@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuchatapp/Auth/Register.dart';
-import 'package:tuchatapp/Chatts/Home.dart';
+import 'package:tuchatapp/Classes/Home.dart';
 import 'package:tuchatapp/sqflitedatabase/DatabaseHelper/DatabaseHelper.dart';
 
 class LoginPage extends StatefulWidget {
@@ -49,19 +49,6 @@ class _LoginPageState extends State<LoginPage> {
       Fluttertoast.showToast(msg: "Parameter Missing", toastLength: Toast.LENGTH_LONG);
     }
 
-  }
-
-  void checkUser() async{
-    var sharedPrefs = await SharedPreferences.getInstance();
-    var currentUser = (sharedPrefs.getString("userId") ?? "");
-    if(currentUser != ""){
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
-    }
-  }
-
-  @override
-  void initState() {
-    checkUser();
   }
 
   @override

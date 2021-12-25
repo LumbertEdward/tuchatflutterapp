@@ -8,11 +8,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuchatapp/AppUtils/AppUtils.dart';
-import 'package:tuchatapp/Chatts/Home.dart';
 import 'package:tuchatapp/Models/Chat.dart';
 import 'package:tuchatapp/Models/Group.dart';
 import 'package:tuchatapp/Uploads/FirebaseUpload.dart';
 import 'package:tuchatapp/sqflitedatabase/DatabaseHelper/DatabaseHelper.dart';
+
+import 'Home.dart';
 
 class Messages extends StatefulWidget {
   const Messages({Key? key}) : super(key: key);
@@ -54,7 +55,7 @@ class _MessagesState extends State<Messages> {
 
     }
     else{
-      Fluttertoast.showToast(msg: "null", toastLength: Toast.LENGTH_LONG);
+      Fluttertoast.showToast(msg: "no group", toastLength: Toast.LENGTH_LONG);
     }
   }
 
@@ -71,42 +72,32 @@ class _MessagesState extends State<Messages> {
     }
   }
 
-  Future<void> uploadImage() async{
-    if(await CheckConnectivityClass.checkInternet()){
-      if(file != null){
-        var url = await FirebaseUpload.uploadImage(file!);
-
-        if(url == ""){
-          Fluttertoast.showToast(msg: "Error uploading image, try again", toastLength: Toast.LENGTH_LONG);
-          print(url);
-        }
-        else{
-
-        }
-      }
-    }
-  }
 
   Future<void> sendMessage() async{
     if(groupId == ""){
       Fluttertoast.showToast(msg: "Group Does not exist", toastLength: Toast.LENGTH_LONG);
     }
     else{
-      var chat_id = Random().nextInt(1000).toString();
-      var chat = Chat(chatId: chat_id, userId: userId, groupId: groupId, message: message.text,
-          date: DateFormat('dd-MM-yyyy').format(DateTime.now()), time: DateFormat.jm().format(DateTime.now()), img: imageUrl);
-
-      var response = await DatabaseHelper.instance.addChat(chat);
-      if(response > 0){
-        var sharedPrefs = await SharedPreferences.getInstance();
-        var ctGrpId = sharedPrefs.getString("chatGroupId") ?? "";
-        setState(() {
-          groupId = ctGrpId;
-        });
-        Fluttertoast.showToast(msg: "Added", toastLength: Toast.LENGTH_LONG);
+      if(message.text == ""){
+        Fluttertoast.showToast(msg: "Enter Message", toastLength: Toast.LENGTH_LONG);
       }
       else{
-        Fluttertoast.showToast(msg: "Not Added", toastLength: Toast.LENGTH_LONG);
+        var chat_id = Random().nextInt(1000).toString();
+        var chat = Chat(chatId: chat_id, userId: userId, groupId: groupId, message: message.text,
+            date: DateFormat('dd-MM-yyyy').format(DateTime.now()), time: DateFormat.jm().format(DateTime.now()), img: imageUrl);
+
+        var response = await DatabaseHelper.instance.addChat(chat);
+        if(response > 0){
+          var sharedPrefs = await SharedPreferences.getInstance();
+          var ctGrpId = sharedPrefs.getString("chatGroupId") ?? "";
+          setState(() {
+            groupId = ctGrpId;
+          });
+          Fluttertoast.showToast(msg: "Added", toastLength: Toast.LENGTH_LONG);
+        }
+        else{
+          Fluttertoast.showToast(msg: "Not Added", toastLength: Toast.LENGTH_LONG);
+        }
       }
     }
   }
@@ -344,9 +335,7 @@ class _MessagesState extends State<Messages> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(
-                            onTap: (){
-
-                            },
+                            onTap: _selectImage,
                             child: Padding(
                               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
                               child: Icon(

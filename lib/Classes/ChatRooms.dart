@@ -1,11 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tuchatapp/Chatts/CodeVerification.dart';
 import 'package:tuchatapp/Models/Group.dart';
-import 'package:tuchatapp/Models/Member.dart';
 import 'package:tuchatapp/sqflitedatabase/DatabaseHelper/DatabaseHelper.dart';
+
+import 'CodeVerification.dart';
 
 class ChatRooms extends StatefulWidget {
   const ChatRooms({Key? key}) : super(key: key);
@@ -15,17 +16,6 @@ class ChatRooms extends StatefulWidget {
 }
 
 class _ChatRoomsState extends State<ChatRooms> {
-
-  Future<void> sendViewGroups() async{
-    var grps = await DatabaseHelper.instance.getGroups();
-    print("Total Groups " + grps.length.toString());
-  }
-
-
-  @override
-  void initState() {
-    sendViewGroups();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +92,11 @@ class _ChatRoomsState extends State<ChatRooms> {
                               child: SizedBox(
                                 height: 40,
                                 width: 40,
-                                child: Image(
+                                child: e.group_image == "" ? Image(
                                   image: AssetImage("images/logotuchat.png"),
+                                  fit: BoxFit.fill,
+                                ): Image(
+                                  image: NetworkImage(e.group_image),
                                   fit: BoxFit.fill,
                                 ),
                               ),
@@ -123,9 +116,24 @@ class _ChatRoomsState extends State<ChatRooms> {
                               var response = await DatabaseHelper.instance.checkMemberJoined(userId, e.group_id);
                               if(response == false){
                                 var prefs = await SharedPreferences.getInstance();
-                                prefs.setString("code", "123456");
-                                prefs.setString("AddedGroupId", e.group_id);
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const CodeVerification()));
+                                var pn = prefs.getString("phone") ?? "";
+                                FirebaseAuth.instance.verifyPhoneNumber(
+                                    phoneNumber: "+254$pn",
+                                    verificationCompleted: (PhoneAuthCredential authCredential) async{
+                                      var prefs = await SharedPreferences.getInstance();
+                                      prefs.setString("code", authCredential.smsCode.toString());
+                                      prefs.setString("AddedGroupId", e.group_id);
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const CodeVerification()));
+                                    },
+                                    verificationFailed: (FirebaseAuthException firebaseAuthException) {
+                                      Fluttertoast.showToast(msg: "Verification Failed", toastLength: Toast.LENGTH_LONG);
+                                    },
+                                    codeSent: (String verificationId, int? forceResendingToken){
+
+                                    },
+                                    codeAutoRetrievalTimeout: (String timeout){
+
+                                    });
                               }
                               else {
                                 Fluttertoast.showToast(

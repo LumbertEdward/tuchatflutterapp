@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tuchatapp/Chatts/Messages.dart';
 import 'package:tuchatapp/Models/Member.dart';
 import 'package:tuchatapp/sqflitedatabase/DatabaseHelper/DatabaseHelper.dart';
+
+import 'Home.dart';
+import 'Messages.dart';
 
 class CodeVerification extends StatefulWidget {
   const CodeVerification({Key? key}) : super(key: key);
@@ -30,30 +32,37 @@ class _CodeVerificationState extends State<CodeVerification> {
     var userId = sharedPrefs.getString("userId") ?? "";
     var grpId = sharedPrefs.getString("AddedGroupId") ?? "";
     var receivedCode = one.text + two.text + three.text + four.text + five.text + six.text;
-
-    if(code == ""){
-      Fluttertoast.showToast(msg: "No Code", toastLength: Toast.LENGTH_LONG);
+    if(receivedCode == ""){
+      Fluttertoast.showToast(msg: "Incomplete Code", toastLength: Toast.LENGTH_LONG);
     }
     else{
-      if(code == receivedCode){
-        var member = Member(userId: userId, groupId: grpId, code: code, dateAdded:
-        DateFormat('dd-MM-yyyy').format(DateTime.now()).toString());
-        var response = await DatabaseHelper.instance.addMember(member);
-        if(response > 0){
-          var sharedPrefs = await SharedPreferences.getInstance();
-          sharedPrefs.setString("chatGroupId", grpId);
-          Fluttertoast.showToast(msg: "added", toastLength: Toast.LENGTH_LONG);
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const Messages()));
-        }else{
-          Fluttertoast.showToast(msg: "Not added", toastLength: Toast.LENGTH_LONG);
+      if(code == ""){
+        Fluttertoast.showToast(msg: "No Code", toastLength: Toast.LENGTH_LONG);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
+      }
+      else{
+        if(code == receivedCode){
+          var member = Member(userId: userId, groupId: grpId, code: code, dateAdded:
+          DateFormat('dd-MM-yyyy').format(DateTime.now()).toString());
+          var response = await DatabaseHelper.instance.addMember(member);
+          if(response > 0){
+            var sharedPrefs = await SharedPreferences.getInstance();
+            sharedPrefs.setString("chatGroupId", grpId);
+            Fluttertoast.showToast(msg: "added", toastLength: Toast.LENGTH_LONG);
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const Messages()));
+          }else{
+            Fluttertoast.showToast(msg: "Not added", toastLength: Toast.LENGTH_LONG);
+          }
+
+        }
+        else{
+          Fluttertoast.showToast(msg: "Code does not match", toastLength: Toast.LENGTH_LONG);
         }
 
       }
-      else{
-        Fluttertoast.showToast(msg: "Code does not match", toastLength: Toast.LENGTH_LONG);
-      }
-
     }
+
+
   }
 
   @override

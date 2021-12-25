@@ -11,13 +11,14 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuchatapp/AppUtils/AppUtils.dart';
 import 'package:tuchatapp/Auth/Login.dart';
-import 'package:tuchatapp/Chatts/ChatRooms.dart';
-import 'package:tuchatapp/Chatts/CodeVerification.dart';
-import 'package:tuchatapp/Chatts/Messages.dart';
 import 'package:tuchatapp/Models/Group.dart';
 import 'package:tuchatapp/Models/GroupDisplay.dart';
 import 'package:tuchatapp/Uploads/FirebaseUpload.dart';
 import 'package:tuchatapp/sqflitedatabase/DatabaseHelper/DatabaseHelper.dart';
+
+import 'ChatRooms.dart';
+import 'CodeVerification.dart';
+import 'Messages.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -52,61 +53,70 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> addChatRoom() async{
-    setState(() {
-      status = true;
-    });
+    if(title.text == "" || desc.text == "" || capacity.text == ""){
+      Fluttertoast.showToast(msg: "Parameters missing", toastLength: Toast.LENGTH_LONG);
+    }
+    else{
+      setState(() {
+        status = true;
+      });
 
-    if(await CheckConnectivityClass.checkInternet()){
       if(file != null){
-        var url = await FirebaseUpload.uploadImage(file!);
+        if(await CheckConnectivityClass.checkInternet()){
+          var url = await FirebaseUpload.uploadImage(file!);
 
-        if(url == ""){
-          Fluttertoast.showToast(msg: "Error uploading image, try again", toastLength: Toast.LENGTH_LONG);
-          print(url);
-          setState(() {
-            status = false;
-          });
-        }
-        else{
-          var grpId = Random().nextInt(100).toString();
-          var grp = Group(group_id: grpId.toString(), group_name: title.text,
-              group_description: desc.text, group_capacity: capacity.text, group_image: url,
-              group_created_by: userId, group_date_created: DateFormat('dd-MM-yyyy').format(DateTime.now()).toString());
-
-          var response = await DatabaseHelper.instance.createGroup(grp);
-          if(response > 0){
+          if(url == ""){
+            Fluttertoast.showToast(msg: "Error uploading image, try again", toastLength: Toast.LENGTH_LONG);
+            print(url);
             setState(() {
               status = false;
             });
-            Fluttertoast.showToast(msg: "Group Created, wait for joining code", toastLength: Toast.LENGTH_LONG);
-            Navigator.of(context).pop(true);
-            var prefs = await SharedPreferences.getInstance();
-            var pn = prefs.getString("phone") ?? "";
-            FirebaseAuth.instance.verifyPhoneNumber(
-                phoneNumber: "+254$pn",
-                verificationCompleted: (PhoneAuthCredential authCredential) async{
-                  var prefs = await SharedPreferences.getInstance();
-                  prefs.setString("code", authCredential.smsCode.toString());
-                  prefs.setString("AddedGroupId", grpId);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CodeVerification()));
-                },
-                verificationFailed: (FirebaseAuthException firebaseAuthException) {
-                  Fluttertoast.showToast(msg: "Verification Failed", toastLength: Toast.LENGTH_LONG);
-                },
-                codeSent: (String verificationId, int? forceResendingToken){
-
-                },
-                codeAutoRetrievalTimeout: (String timeout){
-
-                });
           }
           else{
-            setState(() {
-              status = false;
-            });
-            Fluttertoast.showToast(msg: "Not Added", toastLength: Toast.LENGTH_LONG);
+            var grpId = Random().nextInt(100).toString();
+            var grp = Group(group_id: grpId.toString(), group_name: title.text,
+                group_description: desc.text, group_capacity: capacity.text, group_image: url,
+                group_created_by: userId, group_date_created: DateFormat('dd-MM-yyyy').format(DateTime.now()).toString());
+
+            var response = await DatabaseHelper.instance.createGroup(grp);
+            if(response > 0){
+              setState(() {
+                status = false;
+              });
+              Fluttertoast.showToast(msg: "Group Created, wait for joining code", toastLength: Toast.LENGTH_LONG);
+              Navigator.of(context).pop(true);
+              var prefs = await SharedPreferences.getInstance();
+              var pn = prefs.getString("phone") ?? "";
+              FirebaseAuth.instance.verifyPhoneNumber(
+                  phoneNumber: "+254$pn",
+                  verificationCompleted: (PhoneAuthCredential authCredential) async{
+                    var prefs = await SharedPreferences.getInstance();
+                    prefs.setString("code", authCredential.smsCode.toString());
+                    prefs.setString("AddedGroupId", grpId);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const CodeVerification()));
+                  },
+                  verificationFailed: (FirebaseAuthException firebaseAuthException) {
+                    Fluttertoast.showToast(msg: "Verification Failed", toastLength: Toast.LENGTH_LONG);
+                  },
+                  codeSent: (String verificationId, int? forceResendingToken){
+
+                  },
+                  codeAutoRetrievalTimeout: (String timeout){
+
+                  });
+            }
+            else{
+              setState(() {
+                status = false;
+              });
+              Fluttertoast.showToast(msg: "Not Added", toastLength: Toast.LENGTH_LONG);
+            }
           }
         }
+        else{
+          Fluttertoast.showToast(msg: "No Internet Connection", toastLength: Toast.LENGTH_LONG);
+        }
+
       }
       else{
         var grpId = Random().nextInt(100).toString();
@@ -149,9 +159,6 @@ class _HomePageState extends State<HomePage> {
           Fluttertoast.showToast(msg: "Not Added", toastLength: Toast.LENGTH_LONG);
         }
       }
-    }
-    else{
-      Fluttertoast.showToast(msg: "No Internet Connection", toastLength: Toast.LENGTH_LONG);
     }
   }
 
