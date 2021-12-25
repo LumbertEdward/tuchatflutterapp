@@ -115,6 +115,7 @@ class DatabaseHelper{
       Database db = await instance.database;
       var groups = await db.query(GroupTable.TABLE_NAME, orderBy: GroupTable.COLUMN_NAME_GROUP_NAME);
       List<Group> grps = groups.isNotEmpty ? groups.map((e) => Group.fromMap(e)).toList() : [];
+
       return grps;
   }
 
@@ -125,6 +126,7 @@ class DatabaseHelper{
     whereArgs: [groupId]);
 
     List<Group> grps = groups.isNotEmpty ? groups.map((e) => Group.fromMap(e)).toList() : [];
+    print(grps);
     return grps[0];
   }
 
@@ -165,6 +167,20 @@ class DatabaseHelper{
     }else{
       return [""];
     }
+  }
+
+  Future<bool> checkMemberJoined(String userId, String groupId) async{
+    Database db = await instance.database;
+    var members = await db.query(MemberTable.TABLE_NAME, where: "${MemberTable.COLUMN_NAME_USERID} = ? AND "
+        "${MemberTable.COLUMN_NAME_GROUPID} = ?",
+        whereArgs: [userId, groupId]);
+
+    List<Member> membrs = members.isNotEmpty ? members.map((e) => Member.fromMap(e)).toList(): [];
+
+    if(membrs.length > 0){
+      return true;
+    }
+    return false;
   }
 
   Future<List<GroupDisplay>> getGroupDisplay(String userId) async{
@@ -219,15 +235,7 @@ class DatabaseHelper{
       chatsFinal = [];
     }
 
-    GroupDisplay d = GroupDisplay(group_id: "1234", group_name: "UON", group_image: "group_image", message: "message", date: "12/12/2021", time: "10:12", total: "12");
-    List<GroupDisplay> disp = [];
-    disp.add(d);
-
-    if (kDebugMode) {
-      print(disp);
-    }
-
-    return disp;
+    return chatsFinal;
   }
 
   //leave group
@@ -249,7 +257,6 @@ class DatabaseHelper{
       Database db = await instance.database;
       var chats = await db.query(ChatsTable.TABLE_NAME, where: "${ChatsTable.COLUMN_NAME_GROUPID} = ?",
       whereArgs: [groupId]);
-
       List<Chat> chts = chats.isNotEmpty ? chats.map((e) => Chat.fromMap(e)).toList(): [];
 
       return chts;

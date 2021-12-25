@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
       var user = await DatabaseHelper.instance.loginUser(emailController.text, passwordController.text);
 
       if(user.isNotEmpty){
-        Fluttertoast.showToast(msg: "Login successful ${user[0].firstName}", toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(msg: "Login successful", toastLength: Toast.LENGTH_LONG);
         setState(() {
           status = false;
         });
@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         sharedPrefs.setString("phone", user[0].phone);
         sharedPrefs.setString("userId", user[0].userId);
 
-        //Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
       }else{
         Fluttertoast.showToast(msg: "Wrong username or password", toastLength: Toast.LENGTH_LONG);
         setState(() {
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
     var sharedPrefs = await SharedPreferences.getInstance();
     var currentUser = (sharedPrefs.getString("userId") ?? "");
     if(currentUser != ""){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
     }
   }
 

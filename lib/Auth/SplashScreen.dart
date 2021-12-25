@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuchatapp/Auth/Login.dart';
+import 'package:tuchatapp/Chatts/Home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -11,10 +13,21 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
 
+  void checkUser() async{
+    var sharedPrefs = await SharedPreferences.getInstance();
+    var currentUser = (sharedPrefs.getString("userId") ?? "");
+    if(currentUser != ""){
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
+    }
+    else{
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginPage()));
+    }
+  }
+
   @override
   void initState() {
     Future.delayed(const Duration(milliseconds: 3000), (){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+      checkUser();
     });
   }
   

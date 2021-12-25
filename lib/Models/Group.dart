@@ -2,7 +2,7 @@ class Group{
   final String group_id;
   final String group_name;
   final String group_description;
-  final int group_capacity;
+  final String group_capacity;
   final String group_image;
   final String group_created_by;
   final String group_date_created;
@@ -16,8 +16,8 @@ class Group{
       group_description: json['group_description'],
       group_capacity: json['group_capacity'],
       group_image: json['group_image'],
-      group_created_by: json['Group_Created_By'],
-      group_date_created: json['Group_Date_Created']
+      group_created_by: json['group_created_by'],
+      group_date_created: json['group_date_created']
   );
 
   Map<String, dynamic> toMap(){
@@ -26,6 +26,7 @@ class Group{
       "group_name": group_name,
       "group_description": group_description,
       "group_capacity": group_capacity,
+      "group_image": group_image,
       "group_created_by": group_created_by,
       "group_date_created": group_date_created
     };
