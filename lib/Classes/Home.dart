@@ -462,10 +462,10 @@ class _HomePageState extends State<HomePage> {
                                   child: SizedBox(
                                     height: 40,
                                     width: 40,
-                                    child: Image(
+                                    child: file == null ? Image(
                                       image: AssetImage("images/logotuchat.png"),
                                       fit: BoxFit.fill,
-                                    ),
+                                    ) : Image.file(file!, fit: BoxFit.fill,),
                                   ),
                                 ),
                               ),
