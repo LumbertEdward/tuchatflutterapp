@@ -93,7 +93,6 @@ class _MessagesState extends State<Messages> {
           setState(() {
             groupId = ctGrpId;
           });
-          Fluttertoast.showToast(msg: "Added", toastLength: Toast.LENGTH_LONG);
         }
         else{
           Fluttertoast.showToast(msg: "Not Added", toastLength: Toast.LENGTH_LONG);
@@ -221,11 +220,12 @@ class _MessagesState extends State<Messages> {
                 future: DatabaseHelper.instance.getChats(groupId),
                 builder: (BuildContext context, AsyncSnapshot<List<Chat>> snapshot){
                   if(!snapshot.hasData){
-                    return const Center(child: Text("Loading...."),);
+                    return const Expanded(child: Center(child: Text("Loading...."),));
                   }
                   return snapshot.data!.isEmpty
-                      ? const Center(child: Padding(
-                    padding: EdgeInsets.all(20), child: Text("No Chats", style: TextStyle(fontWeight: FontWeight.bold),),),)
+                      ? const Expanded(
+                      child: Center(child: Padding(
+                        padding: EdgeInsets.all(20), child: Text("No Chats", style: TextStyle(fontWeight: FontWeight.bold),),),))
                       : Expanded(
                       child: ListView(
                         controller: _controller,
