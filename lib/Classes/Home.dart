@@ -60,6 +60,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         status = true;
       });
+      Fluttertoast.showToast(msg: "wait....", toastLength: Toast.LENGTH_LONG);
 
       if(file != null){
         if(await CheckConnectivityClass.checkInternet()){
@@ -526,16 +527,7 @@ class _HomePageState extends State<HomePage> {
                             width: double.infinity,
                             child: ElevatedButton(
                                 onPressed: addChatRoom,
-                                child: !status ? Text("Add ChatRoom") :
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    SizedBox(height: 30,),
-                                    SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white,),),
-                                    SizedBox(height: 30,),
-                                  ],
-                                )
+                                child: Text("Add ChatRoom")
                             ),
                           ),
                         ),
